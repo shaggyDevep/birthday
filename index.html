@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Для тебя ❤️</title>
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
+    position: relative;
+    background: #ff758c;
+    cursor: pointer;
+}
+
+/* Фон */
+.background-columns {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    z-index: 0;
+}
+
+.column {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.scroll {
+    display: flex;
+    flex-direction: column;
+    color: rgba(255,255,255,0.2);
+    font-weight: bold;
+    font-size: 20px;
+    white-space: nowrap;
+}
+
+.up .scroll { animation: moveUp 20s linear infinite; }
+.down .scroll { animation: moveDown 20s linear infinite; }
+
+@keyframes moveUp { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
+@keyframes moveDown { 0% { transform: translateY(-50%); } 100% { transform: translateY(0); } }
+
+/* Карточка по центру */
+.card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 40px 30px;
+    border-radius: 24px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    max-width: 360px;
+    color: white;
+}
+
+h1 { margin-bottom: 15px; font-size: 28px; }
+p { font-size: 18px; line-height: 1.6; opacity: 0; transition: opacity 1.5s ease; }
+
+.birthday {
+    display: inline-block;
+    margin-top: 15px;
+    font-size: 26px;
+    font-weight: 900;
+    color: #ffe066;
+    text-shadow: 0 0 10px rgba(255,224,102,0.8);
+    font-family: 'Trebuchet MS', cursive;
+    cursor: pointer;
+}
+
+button {
+    margin-top: 25px;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 40px;
+    font-size: 16px;
+    cursor: pointer;
+    background: white;
+    color: #ff4d6d;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+button:hover:enabled { transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+button:disabled { opacity: 0.7; cursor: default; }
+
+/* Сердечки и фейерверк */
+.heart, .happyText {
+    position: absolute;
+    font-size: 24px;
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 1;
+}
+.happyText {
+    font-size: 48px;
+    font-weight: 900;
+    color: #ffe066;
+    text-shadow: 0 0 15px #fff, 0 0 30px #ff4d6d, 0 0 45px #ff66a3;
+    opacity: 1;
+    pointer-events: none;
+    animation: popUp 1.5s forwards;
+}
+
+@keyframes explode { to { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; } }
+@keyframes popUp { 0% { transform: scale(0.2); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+</style>
+</head>
+<body>
+
+<!-- ---------------- Фон ---------------- -->
+<div class="background-columns" id="background"></div>
+
+<!-- ---------------- Карточка ---------------- -->
+<div class="card">
+    <h1>Привет, моя ❤️</h1>
+    <p id="text">
+        Я очень благодарен судьбе, что мы сошлись.<br>
+        Ты — самое лучшее, что произошло со мной в 2К25.<br>
+        Я очень тебя люблю ❤️<br><br>
+        <span class="birthday" onclick="birthdayFireworks()">
+            С днём рождения, любимая!
+        </span>
+    </p>
+    <button id="loveBtn" onclick="startLove()">Нажми 💕</button>
+</div>
+
+<audio id="music" src="kiss.mp3"></audio>
+
+<script>
+// -------------------- Фон с колонками --------------------
+const bg = document.getElementById('background');
+const numColumns = 12;
+
+for(let i=0; i<numColumns; i++){
+    const col = document.createElement('div');
+    col.className = 'column ' + (i%2===0 ? 'up' : 'down');
+
+    const scroll = document.createElement('div');
+    scroll.className = 'scroll';
+    const text = Array(50).fill('<span>I Love You</span><br>').join('');
+    scroll.innerHTML = text + text; // дублируем текст для непрерывного движения
+    col.appendChild(scroll);
+    bg.appendChild(col);
+}
+
+// -------------------- Музыка --------------------
+let musicStarted = false;
+function startLove() {
+    const music = document.getElementById('music');
+    const text = document.getElementById('text');
+    const btn = document.getElementById('loveBtn');
+
+    text.style.opacity = 1;
+
+    if (musicStarted) return;
+    musicStarted = true;
+
+    btn.disabled = true;
+    btn.innerText = '❤️';
+
+    music.volume = 0;
+    music.play();
+
+    let volume = 0;
+    const fadeIn = setInterval(() => {
+        if (volume < 0.5) { volume += 0.05; music.volume = volume; }
+        else clearInterval(fadeIn);
+    }, 200);
+
+    birthdayFireworks();
+}
+
+// -------------------- Фейерверки --------------------
+function birthdayFireworks() {
+    const numFireworks = 3 + Math.floor(Math.random() * 3);
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    for (let i = 0; i < numFireworks; i++) {
+        const centerX = Math.random() * screenWidth;
+        const centerY = Math.random() * screenHeight * 0.6 + screenHeight * 0.2;
+        createFirework(centerX, centerY);
+    }
+}
+
+function createFirework(centerX, centerY) {
+    const numHearts = 15 + Math.floor(Math.random() * 10);
+    for (let i = 0; i < numHearts; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.innerText = '❤️';
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = 80 + Math.random() * 120;
+        heart.style.left = centerX + 'px';
+        heart.style.top = centerY + 'px';
+        heart.style.setProperty('--x', Math.cos(angle) * distance + 'px');
+        heart.style.setProperty('--y', Math.sin(angle) * distance + 'px');
+        heart.style.animation = 'explode 1.3s ease-out forwards';
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 1300);
+    }
+}
+
+// -------------------- Happy Birthday по клику на фон --------------------
+document.body.addEventListener('click', function(e){
+    // Если клик не на карточку
+    if(e.target.closest('.card')) return;
+
+    // Создаем текст
+    const happy = document.createElement('div');
+    happy.className = 'happyText';
+    happy.style.left = e.clientX + 'px';
+    happy.style.top = e.clientY + 'px';
+    happy.style.transform = 'translate(-50%, -50%)';
+    happy.innerText = 'Happy Birthday!';
+    document.body.appendChild(happy);
+
+    // Создаем фейерверки вокруг текста
+    const numFireworks = 8 + Math.floor(Math.random() * 5);
+    for(let i=0; i<numFireworks; i++){
+        createFirework(e.clientX, e.clientY);
+    }
+
+    // Удаляем текст через 1.5 сек
+    setTimeout(()=> happy.remove(), 1500);
+});
+</script>
+</body>
+</html>
